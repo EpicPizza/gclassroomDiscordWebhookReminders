@@ -16,8 +16,8 @@ function check() {
 }
 
 function send(content)  { //reference: https://www.labnol.org/code/20563-post-message-to-discord-webhooks
-  var url = "your-webhook-url";
-  var payload = JSON.stringify({ content: "<\@&your-role-id> \n" + content });
+  var url = "your-webhook-url"; //<----- setup a webook and put it here
+  var payload = JSON.stringify({ content: "<\@&your-role-id> \n" + content }); //<----- put a role id here or just remove it if you dont want ping
 
   var params = {
     headers: {
