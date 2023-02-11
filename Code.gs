@@ -1,8 +1,9 @@
 function check() {
   var threads = GmailApp.getInboxThreads();
 
-  for(var i = 0; i < threads.length; i++) {
-    var content = getUsefulStuff(threads[i].getMessages()[0].getBody()); //just looks through the first message in each thread
+  for(var i = 0; i < threads.length; i++) { //just looks through the first message in each thread
+    var content = getUsefulStuff(threads[i].getMessages()[0].getBody()); // tries to get announcement
+    var link = getUsefulStuffLink(threads[i].getMessages()[0].getBody()); // tries to get link for announcement
     if(content != null) { //if it returns content and not null, it has found an annoucement
       if(threads[i].getMessages()[0].isStarred() == false) { //only sends it if it has not been starred, stars are used to track if it has been processed
         Logger.log(content);
