@@ -7,7 +7,10 @@ function check() {
       if(threads[i].getMessages()[0].isStarred() == false) { //only sends it if it has not been starred, stars are used to track if it has been processed
         Logger.log(content);
         threads[i].getMessages()[0].star() //stars for next time
-        send(content); //send to discord
+        content = content.replace(/&lt/, "<");
+        content = content.replace(/&gt/, ">");
+        content += "\n\nLink: " + link;
+        send(content, true); // send to discord
       } else { //if it is starred, just ignore and return the program, since there wouldn't be any more stars after this.
         return;
       }
@@ -15,9 +18,12 @@ function check() {
   }
 }
 
-function send(content)  { //reference: https://www.labnol.org/code/20563-post-message-to-discord-webhooks
+function send(content, ping)  { //reference: https://www.labnol.org/code/20563-post-message-to-discord-webhooks
+  if(ping) {
+    content = "<\@&your-role-ping> \n" + content; //<----- put role ping here
+  }
   var url = "your-webhook-url"; //<----- setup a webook and put it here
-  var payload = JSON.stringify({ content: "<\@&your-role-id> \n" + content }); //<----- put a role id here or just remove it if you dont want ping
+  var payload = JSON.stringify({ content: content });
 
   var params = {
     headers: {
@@ -36,9 +42,17 @@ function send(content)  { //reference: https://www.labnol.org/code/20563-post-me
 function getUsefulStuff(importantInfo) {
   if(importantInfo.includes("your-teacher-name") /* To identify certain class */ && importantInfo.includes("<tr><td style=\"font-size: 11px; font-weight: 500; letter-spacing: 0.8px; float:left; text-transform: uppercase; line-height: 16px;color: #5F6368;\">New announcement</td><td style=\"font-family:  Google Sans,Roboto,Helvetica,Arial,sans-serif; font-size: 14px; letter-spacing: 0.25px; color: #3c4043; float:right;\"></td></tr><tr height=4px></tr>") /* Checks if it is an annoucement */) {
     importantInfo = importantInfo.substring(importantInfo.indexOf("<tr><td style=\"font-size: 11px; font-weight: 500; letter-spacing: 0.8px; float:left; text-transform: uppercase; line-height: 16px;color: #5F6368;\">New announcement</td><td style=\"font-family:  Google Sans,Roboto,Helvetica,Arial,sans-serif; font-size: 14px; letter-spacing: 0.25px; color: #3c4043; float:right;\"></td></tr><tr height=4px></tr>") + 321, importantInfo.indexOf("<tr height=0></tr><tr height=16px></tr>")); //uses certain pieces of html in email to mark location of useful information
-    return filter(importantInfo); //filter html, since it render in discord webhook
+    return filter(importantInfo); //filter html out
   }
   return undefined; //if it didn't find an annoucment
+}
+
+function getUsefulStuffLink(importantInfo) { //same thing but for link
+  if(importantInfo.includes("your-teacher-name") && importantInfo.includes("<tbody><tr><td><a href=https://accounts.google.com/AccountChooser?continue=https://classroom.google.com/c/")) {
+    importantInfo = importantInfo.substring(importantInfo.indexOf("<tbody><tr><td><a href=https://accounts.google.com/AccountChooser?continue=https://classroom.google.com/c/") + 75, importantInfo.indexOf("target=_blank>Open</a>") - 343);
+    return importantInfo;
+  }
+  return undefined;
 }
 
 function filter(html) {
